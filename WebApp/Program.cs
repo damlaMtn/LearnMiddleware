@@ -11,20 +11,36 @@ app.Use(async (HttpContext context, RequestDelegate next) =>
     await context.Response.WriteAsync("Middleware #1: After calling next\r\n");
 });
 
-//Middleware #2
-app.Run(async (context) =>
+app.Map("/employees", (appBuilder) =>
 {
-    await context.Response.WriteAsync("Middleware #2: Processed\r\n");
+    appBuilder.Use(async (HttpContext context, RequestDelegate next) =>
+    {
+        await context.Response.WriteAsync("Middleware #5: Before calling next\r\n");
+
+        await next(context);
+
+        await context.Response.WriteAsync("Middleware #5: After calling next\r\n");
+    });
+
+    appBuilder.Use(async (HttpContext context, RequestDelegate next) =>
+    {
+        await context.Response.WriteAsync("Middleware #6: Before calling next\r\n");
+
+        await next(context);
+
+        await context.Response.WriteAsync("Middleware #6: After calling next\r\n");
+    });
 });
 
-//app.Use(async (context, next) =>
-//{
-//    await context.Response.WriteAsync("Middleware #2: Before calling next\r\n");
+//Middleware #2
+app.Use(async (HttpContext context, RequestDelegate next) =>
+{
+    await context.Response.WriteAsync("Middleware #2: Before calling next\r\n");
+        
+    await next(context); //Commenting this line makes the Middleware #2 a Terminal Middleware
 
-//    await next(context); //Commenting this line will give an arror if you don't use the types of the parameters. You have to call the "next" delegate
-
-//    await context.Response.WriteAsync("Middleware #2: After calling next\r\n");
-//});
+    await context.Response.WriteAsync("Middleware #2: After calling next\r\n");
+});
 
 //Middleware #3
 app.Use(async (HttpContext context, RequestDelegate next) =>
