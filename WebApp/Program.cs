@@ -11,32 +11,37 @@ app.Use(async (HttpContext context, RequestDelegate next) =>
     await context.Response.WriteAsync("Middleware #1: After calling next\r\n");
 });
 
-app.Map("/employees", (appBuilder) =>
+app.MapWhen((context) =>
 {
-    appBuilder.Use(async (HttpContext context, RequestDelegate next) =>
+    return context.Request.Path.StartsWithSegments("/employees") &&
+            context.Request.Query.ContainsKey("id");
+},
+    (appBuilder) =>
     {
-        await context.Response.WriteAsync("Middleware #5: Before calling next\r\n");
+        appBuilder.Use(async (HttpContext context, RequestDelegate next) =>
+        {
+            await context.Response.WriteAsync("Middleware #5: Before calling next\r\n");
 
-        await next(context);
+            await next(context);
 
-        await context.Response.WriteAsync("Middleware #5: After calling next\r\n");
+            await context.Response.WriteAsync("Middleware #5: After calling next\r\n");
+        });
+
+        appBuilder.Use(async (HttpContext context, RequestDelegate next) =>
+        {
+            await context.Response.WriteAsync("Middleware #6: Before calling next\r\n");
+
+            await next(context);
+
+            await context.Response.WriteAsync("Middleware #6: After calling next\r\n");
+        });
     });
-
-    appBuilder.Use(async (HttpContext context, RequestDelegate next) =>
-    {
-        await context.Response.WriteAsync("Middleware #6: Before calling next\r\n");
-
-        await next(context);
-
-        await context.Response.WriteAsync("Middleware #6: After calling next\r\n");
-    });
-});
 
 //Middleware #2
 app.Use(async (HttpContext context, RequestDelegate next) =>
 {
     await context.Response.WriteAsync("Middleware #2: Before calling next\r\n");
-        
+
     await next(context); //Commenting this line makes the Middleware #2 a Terminal Middleware
 
     await context.Response.WriteAsync("Middleware #2: After calling next\r\n");
