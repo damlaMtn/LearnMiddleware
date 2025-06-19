@@ -11,7 +11,7 @@ app.Use(async (HttpContext context, RequestDelegate next) =>
     await context.Response.WriteAsync("Middleware #1: After calling next\r\n");
 });
 
-app.MapWhen((context) =>
+app.UseWhen((context) =>
 {
     return context.Request.Path.StartsWithSegments("/employees") &&
             context.Request.Query.ContainsKey("id");
@@ -36,6 +36,32 @@ app.MapWhen((context) =>
             await context.Response.WriteAsync("Middleware #6: After calling next\r\n");
         });
     });
+
+//app.MapWhen((context) =>
+//{
+//    return context.Request.Path.StartsWithSegments("/employees") &&
+//            context.Request.Query.ContainsKey("id");
+//},
+//    (appBuilder) =>
+//    {
+//        appBuilder.Use(async (HttpContext context, RequestDelegate next) =>
+//        {
+//            await context.Response.WriteAsync("Middleware #5: Before calling next\r\n");
+
+//            await next(context);
+
+//            await context.Response.WriteAsync("Middleware #5: After calling next\r\n");
+//        });
+
+//        appBuilder.Use(async (HttpContext context, RequestDelegate next) =>
+//        {
+//            await context.Response.WriteAsync("Middleware #6: Before calling next\r\n");
+
+//            await next(context);
+
+//            await context.Response.WriteAsync("Middleware #6: After calling next\r\n");
+//        });
+//    });
 
 //Middleware #2
 app.Use(async (HttpContext context, RequestDelegate next) =>
